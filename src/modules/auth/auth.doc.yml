@@ -1,0 +1,63 @@
+/auth/signup:
+  post:
+    description: Sign up
+    tags: 
+      - auth
+    summary: User signup api
+    produces": 
+      - application/json
+    parameters: 
+
+      - name: body
+        in: body
+        description: sign up data
+        required: true
+        schema: 
+          type: object
+          properties:
+            firstName:
+              type: string
+            lastName:
+              type: string
+            email:
+              type: string
+            password:
+              type: string
+            confirmPassword:
+              type: string
+    responses:
+        200:
+          description: Sign up successfully.
+        400:
+          description: Bad Request
+        500:
+          description: Internal Server Error
+/auth/login:
+  get:
+    description: login
+    tags: 
+      - auth
+    summary: user login
+    produces": 
+      - application/json
+    parameters: 
+
+      - name: body
+        in: body
+        description: login data
+        required: true
+        schema: 
+          type: object
+          properties:
+            email:
+              type: string
+            password:
+              type: string
+    responses:
+        200:
+          description: login up successfully.
+        401:
+          description: Unauthorized Request
+        500:
+          description: Internal Server Error
+    
