@@ -30,7 +30,7 @@ module.exports = (err, req, res, next) => {
       });
     }
    
-    console.log("something went wrong");
+    console.log(err);
     let error = { ...err };
     error.message = err.message;
     res.status(error.statusCode).json({

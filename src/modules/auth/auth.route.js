@@ -1,7 +1,7 @@
 import AuthController from  "./auth.controller";
 import catchAsynError from '../../exception/catchAsyncError';
 
-import { validateSignup } from "./auth.validation";
+import { validateSignup, validateLogin } from "./auth.validation";
 const router = require("express").Router();
 
 
@@ -11,4 +11,10 @@ router.post(
   catchAsynError(AuthController.signUp)
 );
 
+router.post(
+    "/login",
+    validateLogin,
+    catchAsynError(AuthController.login)
+  );
+  
 export default router;

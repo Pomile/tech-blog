@@ -18,3 +18,9 @@ export const validateSignup = [
         return true;
       }),
 ];
+
+
+export const validateLogin = [
+    body('email').isEmail().normalizeEmail(),
+    body('password').notEmpty()
+];

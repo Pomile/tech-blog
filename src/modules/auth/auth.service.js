@@ -1,6 +1,7 @@
 
 import ErrorHandler from "../../exception/errorHandler";
 import { User } from "../user/user.model";
+import { generateToken } from '../../helper/token'
 
 class AuthService {
 
@@ -19,5 +20,24 @@ class AuthService {
             email: user.email
         }
     }
+
+   static async login (data) {
+    const user = await User.findOne({ email: data.email });
+    if(!user) throw new ErrorHandler('incorrect email or password', 401)
+    await user.comparePassword(data.password, user.password, (err, result) => {
+        if(err) throw new ErrorHandler('incorrect email or password', 401)
+        return result
+    });
+    const token = generateToken({
+        id: user._id,
+        fullname: user.fullname,
+        email: user.email
+    })
+    return {
+        fullname: user.fullname,
+        email: user.email,
+        token: `Bearer ${token}`
+    }
+   }
 }
 export default AuthService

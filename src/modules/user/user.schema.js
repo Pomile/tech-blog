@@ -35,8 +35,8 @@ userSchema.pre('save', function(next) {
   });
 });
 
-userSchema.methods.comparePassword = async (password, cb) => {
-  const match = await bcrypt.compare(password, this.password);
+userSchema.methods.comparePassword = async (password, hash, cb) => {
+  const match = await bcrypt.compare(password, hash);
   if(match) {
     return cb(null, true)
   } else {
@@ -44,4 +44,11 @@ userSchema.methods.comparePassword = async (password, cb) => {
   }
 };
 
-  
+userSchema.methods.generateJwtToken = async (user, cb) => {
+  const match = await bcrypt.compare(password, hash);
+  if(match) {
+    return cb(null, true)
+  } else {
+    return cb('Password mismatch', false)
+  }
+};
