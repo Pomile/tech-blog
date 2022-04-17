@@ -10,7 +10,8 @@ const { Schema } = mongoose;
     password: String,
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
-    interest: [{ type: String, index: true }]
+    interest: [{ type: String, index: true }],
+    isVerified: { type: Boolean,  default: false }
   }, { autoIndex: false });
 
 userSchema.virtual('fullname').get(function() {
