@@ -31,6 +31,24 @@ class MailSender {
         }
       );
   }
+
+  static sendPasswordResetLink({email, token }) {
+    console.log({email, token })
+    const url = process.env.FRONTEND_BASE_URL + "/password-reset/" + token;
+    Mail._sendEmail(
+        {
+          email,
+          subject: "Password Reset",
+          template: "password-reset",
+          params: {
+            passwordResetURL: url
+          }
+        },
+        (err, data) => {
+          if (err) console.log(err);
+        }
+      );
+  }
 }
 
 export default MailSender;

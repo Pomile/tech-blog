@@ -1,3 +1,4 @@
+import { validateResult } from "../../common/validateResult";
 import AuthService from "./auth.service";
 const { validationResult } = require('express-validator');
 
@@ -9,10 +10,7 @@ class AuthController{
      * @param {object} res 
      */
     static async signUp (req, res) {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ message: 'ValidationException', errors: errors.array() });
-        }
+        validateResult(req);
         const data = req.body;
         const user = await AuthService.signUp(data);
         return res.status(200).json({
@@ -28,15 +26,58 @@ class AuthController{
      * @param {object} res 
      */
      static async login (req, res) {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ success: false, message: 'ValidationException', errors: errors.array() });
-        }
+        validateResult(req);
         const cred = req.body;
         const data = await AuthService.login(cred);
         return res.status(200).json({
             success: true,
             data
+        })
+    }
+
+    /**
+     * @description Confirm Email
+     * @param {object} req 
+     * @param {object} res 
+     */
+    static async confirmEmail(req, res) {
+        validateResult(req);
+        const token = req.body.token;
+        const message = await AuthService.verifyEmail(token);
+        return res.status(200).json({
+            success: true,
+            message
+        })
+    }
+
+    /**
+     * @description Confirm Email
+     * @param {object} req 
+     * @param {object} res 
+     */
+     static async generatePasswordResetToken(req, res) {
+        validateResult(req);
+        const email = req.body.email;
+        const message = await AuthService.generatePasswordResetToken(email);
+        return res.status(200).json({
+            success: true,
+            message
+        })
+    }
+
+    /**
+     * @description Verify Password Token
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
+    static async verifyPasswordResetToken(req, res) {
+        validateResult(req);
+        const token = req.body.token;
+        const message = await AuthService.verifyPasswordResetToken(token);
+        return res.status(200).json({
+            success: true,
+            message
         })
     }
 

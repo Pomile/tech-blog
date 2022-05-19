@@ -60,12 +60,47 @@ class AuthService {
 
    static async verifyEmail(hash){
     const token = await Token.findOne({ token: hash });
+    console.log(token);
     if(token){
         await User.updateOne(
             { email: token.email }, 
             { isVerified: true }
         );
-        event.fire('remove:email-verification-token', { email, type: 'email-verification'});
+        // console.log(token);
+        event.fire('remove:email-verification-token', { email: token.email, type: 'email-verification'});
+        return 'Email confirmed successfully'
+    } else {
+        throw new ErrorHandler('Email verification token expired', 404)
+    }
+
+   }
+
+   static async generatePasswordResetToken(email) {
+
+    let user = await User.findOne({ email });
+    if(!user) throw new ErrorHandler("Email not found", 404);
+    const token = genHash(email);
+    event.fire('save:password-reset-token', { 
+        token,
+        type: "password-reset-verification",
+        email, 
+    });
+    return 'Password reset link sent';
+   }
+   /**
+    * 
+    * @param {*} hash 
+    * @returns 
+    */
+   static async verifyPasswordResetToken(hash){
+    console.log(hash);
+    const token = await Token.findOne({ token: hash });
+    console.log("token: " + token);
+    if(token){
+        event.fire('remove:password-reset-token', { email: token.email, type: 'password-reset-verification'});
+        return 'Email confirmed successfully'
+    } else {
+        throw new ErrorHandler('Email verification token expired', 404)
     }
    }
 }

@@ -24,3 +24,11 @@ export const validateLogin = [
     body('email').isEmail().normalizeEmail(),
     body('password').notEmpty()
 ];
+
+export const validateEmail = [
+    body('email').isEmail().normalizeEmail()
+];
+
+export const validateConfirmEmail = [
+    body('token').notEmpty()
+];
