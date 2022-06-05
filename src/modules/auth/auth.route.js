@@ -1,7 +1,13 @@
 import AuthController from  "./auth.controller";
 import catchAsynError from '../../exception/catchAsyncError';
 
-import { validateSignup, validateLogin, validateConfirmEmail, validateEmail } from "./auth.validation";
+import { 
+  validateSignup,
+  validateLogin,
+  validateConfirmEmail,
+  validateEmail,
+  validatePasswordReset 
+} from "./auth.validation";
 const router = require("express").Router();
 
 
@@ -15,6 +21,26 @@ router.post(
   "/login",
   validateLogin,
   catchAsynError(AuthController.login)
+);
+
+router.get(
+  "/google",
+  catchAsynError(AuthController.getGoogleOAuthUrl)
+);
+
+router.get(
+  "/facebook",
+  catchAsynError(AuthController.getFacebookOAuthUrl)
+);
+
+router.get(
+  "/google/callback",
+  catchAsynError(AuthController.googleOAuthCallback)
+);
+
+router.get(
+  "/facebook/callback",
+  catchAsynError(AuthController.facebookOAuthCallback)
 );
 
 router.post(
@@ -33,6 +59,12 @@ router.post(
   "/password-reset/token",
   validateConfirmEmail,
   catchAsynError(AuthController.verifyPasswordResetToken)
+);
+
+router.post(
+  "/password-reset",
+  validatePasswordReset,
+  catchAsynError(AuthController.resetPassword)
 );
   
 export default router;

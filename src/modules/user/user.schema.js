@@ -8,10 +8,13 @@ const { Schema } = mongoose;
     email:   String,
     image: String,
     password: String,
+    interest: [{ type: String, index: true }],
+    isVerified: { type: Boolean,  default: false },
+    auth: { type: String, default: 'local' },
+    authId: { type: String },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
-    interest: [{ type: String, index: true }],
-    isVerified: { type: Boolean,  default: false }
+    
   }, { autoIndex: false });
 
 userSchema.virtual('fullname').get(function() {
@@ -19,8 +22,22 @@ userSchema.virtual('fullname').get(function() {
 });
 
 userSchema.pre(['updateOne', 'findOneAndUpdate'], function(next) {
-  this.updatedAt = Date.now;
-  next();
+  const saltRounds = 10;
+  const user = this;
+  user.updatedAt = Date.now;
+  const { password } = user.getUpdate();
+  if(password) {
+    bcrypt.genSalt(saltRounds, function(err, salt) {
+      bcrypt.hash(password, salt, function(err, hash) {
+          if (err) return next(err);
+          console.log(hash)
+          user.setUpdate({ password: hash })
+          next();
+      });
+  });
+  } else {
+    next()
+  }
 });
 
 userSchema.pre('save', function(next) {

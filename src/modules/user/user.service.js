@@ -29,5 +29,35 @@ class UserService {
             .select({ password: 0, __v: 0 });
         return profile;
     }
+
+    static async updateOrCreateUserFromOAuth (strategy, oauthUserInfo) {
+        console.log(oauthUserInfo)
+        let exists = false;
+        const {
+            id,
+            given_name,
+            family_name,
+            picture,
+            verified_email,
+            email
+        } = oauthUserInfo;
+        let user = await User.findOne({ email });
+        if(user) {
+            user = await User.findOneAndUpdate({ email }, { auth: strategy, authId: id, isVerified: verified_email, image: picture }, {new: true});
+            exists = true;
+         } else {
+            user = await User.create({
+                authId: id,
+                isVerified: true,
+                email,
+                auth: strategy,
+                firstName: given_name,
+                lastName: family_name,
+                image: picture
+            });
+         }
+
+        return { user, exists };
+    }
 }
 export default UserService

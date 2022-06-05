@@ -6,6 +6,9 @@ import { generateToken } from '../../helper/token'
 import { genHash } from "../../helper/util";
 import event from "../../helper/event";
 import MailSender from "../../services/Mail";
+import { getGoogleOAuthUrl, getGoogleUser , getFacebookOAuthUrl, getFacebookUser} from "../../helper/oauth";
+import UserService from "../user/user.service";
+const { FRONTEND_BASE_URL } = process.env;
 
 class AuthService {
 
@@ -88,20 +91,94 @@ class AuthService {
     return 'Password reset link sent';
    }
    /**
-    * 
+    * Verify Password Reset Token
     * @param {*} hash 
     * @returns 
     */
    static async verifyPasswordResetToken(hash){
-    console.log(hash);
     const token = await Token.findOne({ token: hash });
-    console.log("token: " + token);
     if(token){
-        event.fire('remove:password-reset-token', { email: token.email, type: 'password-reset-verification'});
         return 'Email confirmed successfully'
     } else {
         throw new ErrorHandler('Email verification token expired', 404)
     }
    }
+
+   /**
+    * Verify Password Reset Token
+    * @param {*} hash 
+    * @returns 
+    */
+    static async resetPassword(hash, password){
+        console.log(hash);
+        const token = await Token.findOne({ token: hash });
+        console.log("token: " + token);
+        if(token){
+            await User.findOneAndUpdate({ email: token.email }, { password }, {new: true})
+            event.fire('remove:password-reset-token', { email: token.email, type: 'password-reset-verification'});
+            return 'Password changed successfully'
+        } else {
+            throw new ErrorHandler('Invalid token', 400)
+        }
+    }
+
+    /**
+     * Generate Google OAuth URL
+     */
+
+    static getGoogleOAuthUrl() {
+        const authorizationUrl = getGoogleOAuthUrl();
+        return authorizationUrl
+    }
+
+    /**
+     * Generate Facebook OAuth URL
+     */
+
+     static getFacebookOAuthUrl() {
+        const authorizationUrl = getFacebookOAuthUrl();
+        return authorizationUrl
+    }
+
+    static async googleOAuthCallback(code) {
+        let data;
+        const oauthUserInfo = await getGoogleUser({ code });
+        if(oauthUserInfo) {
+            data = await UserService.updateOrCreateUserFromOAuth('google', oauthUserInfo);
+            const token = generateToken({
+                id: data.user._id,
+                fullname: data.user.fullname,
+                email: data.user.email
+            });
+            return {
+                fullname: data.user.fullname,
+                email: data.user.email,
+                token
+            }
+        } else {
+            throw new ErrorHandler("UnAuthorized. Something went wrong", 401)
+        }
+    }
+
+    static async facebookOAuthCallback(code) {
+        let data;
+        const oauthUserInfo = await getFacebookUser({ code });
+        if(oauthUserInfo) {
+            data = await UserService.updateOrCreateUserFromOAuth('facebook', oauthUserInfo);
+            console.log(data);
+            const token = generateToken({
+                id: data.user._id,
+                fullname: data.user.fullname,
+                email: data.user.email
+            });
+            return {
+                fullname: data.user.fullname,
+                email: data.user.email,
+                token
+            }
+        } else {
+            throw new ErrorHandler("UnAuthorized. Something went wrong", 401)
+        }
+    }
 }
 export default AuthService

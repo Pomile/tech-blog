@@ -13,11 +13,13 @@ class Authentication {
         // console.log(req)
         const token = req.headers.authorization || req.headers.Authorization || req.headers.token
         || req.headers['x-access-token'] || req.query.token || req.body.token;
-        if (!token) throw new ErrorHandler("Unauthorized", 401);
-        const jwtToken = token.split(" ")[1];
-        const payload = await jwt.verify(jwtToken, process.env.APP_SECRET);
-        if(!payload) throw new ErrorHandler("Unauthorized", 401);
+        console.log(token);
+        
         try {
+            if (!token) throw new ErrorHandler("Unauthorized", 401);
+            const jwtToken = token.split(" ")[1];
+            const payload = await jwt.verify(jwtToken, process.env.APP_SECRET);
+            if(!payload) throw new ErrorHandler("Unauthorized", 401);
             req.payload = payload;
             req.token = token;
             req.auth = payload;
